@@ -1,4 +1,4 @@
-package main
+package mavp2p
 
 import (
 	"context"
@@ -41,7 +41,7 @@ func (i remoteNodeKey) String() string {
 	return fmt.Sprintf("chan=%s sid=%d cid=%d", i.channel, i.systemID, i.componentID)
 }
 
-type messageHandler struct {
+type MessageHandler struct {
 	ctx              context.Context
 	wg               *sync.WaitGroup
 	streamreqDisable bool
@@ -51,13 +51,13 @@ type messageHandler struct {
 	remoteNodes     map[remoteNodeKey]time.Time
 }
 
-func newMessageHandler(
+func NewMessageHandler(
 	ctx context.Context,
 	wg *sync.WaitGroup,
 	streamreqDisable bool,
 	node *gomavlib.Node,
-) (*messageHandler, error) {
-	mh := &messageHandler{
+) (*MessageHandler, error) {
+	mh := &MessageHandler{
 		ctx:              ctx,
 		wg:               wg,
 		streamreqDisable: streamreqDisable,
@@ -71,7 +71,7 @@ func newMessageHandler(
 	return mh, nil
 }
 
-func (mh *messageHandler) run() {
+func (mh *MessageHandler) run() {
 	defer mh.wg.Done()
 
 	// delete remote nodes after a period of inactivity
@@ -98,7 +98,7 @@ func (mh *messageHandler) run() {
 	}
 }
 
-func (mh *messageHandler) findNodeBySystemID(systemID byte) *remoteNodeKey {
+func (mh *MessageHandler) findNodeBySystemID(systemID byte) *remoteNodeKey {
 	for key := range mh.remoteNodes {
 		if key.systemID == systemID {
 			return &key
@@ -107,7 +107,7 @@ func (mh *messageHandler) findNodeBySystemID(systemID byte) *remoteNodeKey {
 	return nil
 }
 
-func (mh *messageHandler) findNodeBySystemAndComponentID(systemID byte, componentID byte) *remoteNodeKey {
+func (mh *MessageHandler) findNodeBySystemAndComponentID(systemID byte, componentID byte) *remoteNodeKey {
 	for key := range mh.remoteNodes {
 		if key.systemID == systemID && key.componentID == componentID {
 			return &key
@@ -116,7 +116,7 @@ func (mh *messageHandler) findNodeBySystemAndComponentID(systemID byte, componen
 	return nil
 }
 
-func (mh *messageHandler) onEventFrame(evt *gomavlib.EventFrame) {
+func (mh *MessageHandler) OnEventFrame(evt *gomavlib.EventFrame) {
 	key := remoteNodeKey{
 		channel:     evt.Channel,
 		systemID:    evt.SystemID(),
@@ -169,7 +169,7 @@ func (mh *messageHandler) onEventFrame(evt *gomavlib.EventFrame) {
 	mh.node.WriteFrameExcept(evt.Channel, evt.Frame) //nolint:errcheck
 }
 
-func (mh *messageHandler) onEventChannelClose(evt *gomavlib.EventChannelClose) {
+func (mh *MessageHandler) OnEventChannelClose(evt *gomavlib.EventChannelClose) {
 	mh.remoteNodeMutex.Lock()
 	defer mh.remoteNodeMutex.Unlock()
 

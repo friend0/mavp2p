@@ -6,13 +6,14 @@ import (
 
 	"github.com/bluenviron/gomavlib/v3"
 	"github.com/bluenviron/gomavlib/v3/pkg/dialects/common"
+	"github.com/bluenviron/mavp2p/mavp2p"
 	"github.com/stretchr/testify/require"
 )
 
 func TestBroadcast(t *testing.T) {
-	p, err := newProgram([]string{"--print", "tcps:0.0.0.0:6666"})
+	p, err := mavp2p.NewProgramFromCLI([]string{"--print", "tcps:0.0.0.0:6666"})
 	require.NoError(t, err)
-	defer p.close()
+	defer p.Close()
 
 	pub, err := gomavlib.NewNode(gomavlib.NodeConf{
 		Endpoints: []gomavlib.EndpointConf{
@@ -72,9 +73,9 @@ func TestBroadcast(t *testing.T) {
 }
 
 func TestTarget(t *testing.T) {
-	p, err := newProgram([]string{"tcps:0.0.0.0:6666"})
+	p, err := mavp2p.NewProgramFromCLI([]string{"tcps:0.0.0.0:6666"})
 	require.NoError(t, err)
-	defer p.close()
+	defer p.Close()
 
 	pub, err := gomavlib.NewNode(gomavlib.NodeConf{
 		Endpoints: []gomavlib.EndpointConf{
@@ -174,9 +175,9 @@ func TestTarget(t *testing.T) {
 }
 
 func TestTargetNotFound(t *testing.T) {
-	p, err := newProgram([]string{"tcps:0.0.0.0:6666"})
+	p, err := mavp2p.NewProgramFromCLI([]string{"tcps:0.0.0.0:6666"})
 	require.NoError(t, err)
-	defer p.close()
+	defer p.Close()
 
 	pub, err := gomavlib.NewNode(gomavlib.NodeConf{
 		Endpoints: []gomavlib.EndpointConf{

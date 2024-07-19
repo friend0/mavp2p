@@ -1,4 +1,4 @@
-package main
+package mavp2p
 
 import (
 	"context"
@@ -9,7 +9,7 @@ import (
 	"github.com/bluenviron/gomavlib/v3"
 )
 
-type errorHandler struct {
+type ErrorHandler struct {
 	ctx               context.Context
 	wg                *sync.WaitGroup
 	printSingleErrors bool
@@ -18,12 +18,12 @@ type errorHandler struct {
 	errorCountMutex sync.Mutex
 }
 
-func newErrorHandler(
+func NewErrorHandler(
 	ctx context.Context,
 	wg *sync.WaitGroup,
 	printSingleErrors bool,
-) (*errorHandler, error) {
-	eh := &errorHandler{
+) (*ErrorHandler, error) {
+	eh := &ErrorHandler{
 		ctx:               ctx,
 		wg:                wg,
 		printSingleErrors: printSingleErrors,
@@ -35,7 +35,7 @@ func newErrorHandler(
 	return eh, nil
 }
 
-func (eh *errorHandler) run() {
+func (eh *ErrorHandler) run() {
 	defer eh.wg.Done()
 
 	if eh.printSingleErrors {
@@ -64,7 +64,7 @@ func (eh *errorHandler) run() {
 	}
 }
 
-func (eh *errorHandler) onEventError(evt *gomavlib.EventParseError) {
+func (eh *ErrorHandler) OnEventError(evt *gomavlib.EventParseError) {
 	if eh.printSingleErrors {
 		log.Printf("ERR: %s", evt.Error)
 		return
